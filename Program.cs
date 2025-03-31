@@ -26,42 +26,65 @@ namespace Drawing_Complex
             for (int i = 1; i < N; i++)
                 freqs.Add((float)i / N + random.NextSingle() * 0.5f);
         }
+        enum Mode
+        {
+            WithBrushLines, WithOutBrushLines,
+        }
+        static void UpdateVecs(Mode m)
+        {
+            Vector2 accumulate = new();
+            if (m == Mode.WithBrushLines)
+            {
+                vecs.Add(center);
+                for (int i = 1; i < N; i++)
+                {
+                    vecs.Add(vecs[i - 1] + new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase)));
+                }
+                accumulate = vecs[^1];
+            }
+            else if (m == Mode.WithOutBrushLines)
+            {
+                for (int i = 1; i < N; i++)
+                    accumulate += new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase));
+                accumulate += center;
+            }
+            pts.Add(accumulate);
+        }
+        static void UpdateState()
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.R))
+            {
+                Reset();
+            }
+            w = Raylib.GetScreenWidth();
+            h = Raylib.GetScreenHeight();
+            angle += 0.05f;
+        }
+        static void Render(Mode m)
+        {
+            if (m == Mode.WithBrushLines)
+                for (int i = 1; i < N; i++)
+                    Raylib.DrawLineV(vecs[i - 1], vecs[i], Color.White);
+
+            for (int i = 0; i < pts.Count - 1; i++)
+                Raylib.DrawLineV(pts[i], pts[i + 1], Color.White);
+        }
         static void Main(string[] args)
         {
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
             int FPS = 60;
             Raylib.SetTargetFPS(FPS);
             Raylib.InitWindow(w, h, "Complex");
+            Mode m = Mode.WithBrushLines;
             Reset();
             while(!Raylib.WindowShouldClose())
             {
-                if (Raylib.IsKeyPressed(KeyboardKey.R))
-                {
-                    Reset();
-                }
-                w = Raylib.GetScreenWidth();
-                h = Raylib.GetScreenHeight();
+                UpdateState();
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(new(0x18, 0x18, 0x18));
 
-                angle += 0.05f;
-                //vecs.Add(center);
-                //for (int i = 1; i < N; i++)
-                //{
-                //    vecs.Add(vecs[i - 1] + new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase)));
-                //}
-                //pts.Add(vecs[^1]);
-                //for (int i = 1; i < N; i++)
-                //    Raylib.DrawLineV(vecs[i - 1], vecs[i], Color.White);
-                Vector2 accumulate = new(0, 0);
-                for (int i = 1; i < N; i++)
-                    accumulate += new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase));
-                accumulate += center;
-                pts.Add(accumulate);
-
-                for (int i = 0; i < pts.Count - 1; i++)
-                    Raylib.DrawLineV(pts[i], pts[i + 1], Color.White);
-
+                UpdateVecs(m);
+                Render(m);
 
                 vecs.Clear();
                 Raylib.DrawFPS(0, 0);
