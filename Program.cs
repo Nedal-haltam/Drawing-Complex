@@ -26,15 +26,15 @@ namespace Drawing_Complex
             for (int i = 1; i < N; i++)
                 freqs.Add((float)i / N + random.NextSingle() * 0.5f);
         }
-        enum Mode
+        enum DrawingMode
         {
             WithBrushLines, WithOutBrushLines,
         }
-        static void UpdateVecs(Mode m)
+        static void UpdateVecs(DrawingMode m)
         {
             Vector2 center = new(w / 2, h / 2);
             Vector2 accumulate = new();
-            if (m == Mode.WithBrushLines)
+            if (m == DrawingMode.WithBrushLines)
             {
                 vecs.Add(center);
                 for (int i = 1; i < N; i++)
@@ -43,7 +43,7 @@ namespace Drawing_Complex
                 }
                 accumulate = vecs[^1];
             }
-            else if (m == Mode.WithOutBrushLines)
+            else if (m == DrawingMode.WithOutBrushLines)
             {
                 for (int i = 1; i < N; i++)
                     accumulate += new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase));
@@ -61,9 +61,9 @@ namespace Drawing_Complex
             h = Raylib.GetScreenHeight();
             angle += 0.05f;
         }
-        static void Render(Mode m)
+        static void Render(DrawingMode m)
         {
-            if (m == Mode.WithBrushLines)
+            if (m == DrawingMode.WithBrushLines)
                 for (int i = 1; i < N; i++)
                     Raylib.DrawLineV(vecs[i - 1], vecs[i], Color.White);
 
@@ -72,13 +72,15 @@ namespace Drawing_Complex
         }
         static void TakeScreenShotAndSave(int i)
         {
-            // ffmpeg -framerate 30 -i image%d.png -c:v libx264 -pix_fmt yuv420p output.mp4
+            // ffmpeg -framerate 60 -i image%d.png -c:v libx264 -pix_fmt yuv420p output.mp4
+            string dirpath = $"./pics/";
             string filepath = $"image{i}.png";
-            string destination = $"./pics/{filepath}";
-            if (File.Exists(destination))
-            {
-                File.Delete(destination);
-            }
+            string destination = dirpath + $"{filepath}";
+
+            if (!Directory.Exists(dirpath))
+                Directory.CreateDirectory(dirpath);
+
+
             Image image = Raylib.LoadImageFromScreen();
             Raylib.ExportImage(image, filepath);
             Raylib.UnloadImage(image);
@@ -89,10 +91,14 @@ namespace Drawing_Complex
         {
             int i = 0;
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
-            int FPS = 60;
+            int FPS = 0;
             Raylib.SetTargetFPS(FPS);
+
+            bool generate = false;
+            int sec = 10;
+            int duration = sec * 60;
             Raylib.InitWindow(w, h, "Complex");
-            Mode m = Mode.WithBrushLines;
+            DrawingMode m = DrawingMode.WithBrushLines;
             Reset();
             while(!Raylib.WindowShouldClose())
             {
@@ -103,16 +109,12 @@ namespace Drawing_Complex
                 UpdateVecs(m);
                 Render(m);
 
-
-                vecs.Clear();
+                    vecs.Clear();
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
                 // TODO: specify a duration to produce produce image for and then pipe to ffmpeg
-                if (Raylib.IsKeyPressed(KeyboardKey.S))
-                //if (true)
-                {
+                if (generate && i < duration)
                     TakeScreenShotAndSave(i++);
-                }
             }
             Raylib.CloseWindow();
         }
