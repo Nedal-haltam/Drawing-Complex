@@ -1,16 +1,17 @@
 ﻿
 using Raylib_cs;
 using System.Numerics;
+using System.Reflection.Metadata;
 
 namespace Drawing_Complex
 {
     internal class Program
     {
         static Random random = new();
-        static int w = 800;
-        static int h = 600;
+        static int w = 1000;
+        static int h = 750;
         static float angle = 0.0f;
-        static float mag = 90.0f;
+        static float mag = 110.0f;
         static float phase = MathF.PI / 4.0f;
         static int N = 3;
 
@@ -69,8 +70,24 @@ namespace Drawing_Complex
             for (int i = 0; i < pts.Count - 1; i++)
                 Raylib.DrawLineV(pts[i], pts[i + 1], Color.White);
         }
+        static void TakeScreenShotAndSave(int i)
+        {
+            // ffmpeg -framerate 30 -i image%d.png -c:v libx264 -pix_fmt yuv420p output.mp4
+            string filepath = $"image{i}.png";
+            string destination = $"./pics/{filepath}";
+            if (File.Exists(destination))
+            {
+                File.Delete(destination);
+            }
+            Image image = Raylib.LoadImageFromScreen();
+            Raylib.ExportImage(image, filepath);
+            Raylib.UnloadImage(image);
+            while (!File.Exists(filepath)) ;
+            File.Move(filepath, destination);
+        }
         static void Main(string[] args)
         {
+            int i = 0;
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
             int FPS = 60;
             Raylib.SetTargetFPS(FPS);
@@ -86,9 +103,16 @@ namespace Drawing_Complex
                 UpdateVecs(m);
                 Render(m);
 
+
                 vecs.Clear();
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
+                // TODO: specify a duration to produce produce image for and then pipe to ffmpeg
+                //if (Raylib.IsKeyPressed(KeyboardKey.S))
+                if (true)
+                {
+                    TakeScreenShotAndSave(i++);
+                }
             }
             Raylib.CloseWindow();
         }
