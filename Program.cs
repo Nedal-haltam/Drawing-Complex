@@ -108,8 +108,8 @@ namespace Drawing_Complex
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
                 // TODO: specify a duration to produce produce image for and then pipe to ffmpeg
-                //if (Raylib.IsKeyPressed(KeyboardKey.S))
-                if (true)
+                if (Raylib.IsKeyPressed(KeyboardKey.S))
+                //if (true)
                 {
                     TakeScreenShotAndSave(i++);
                 }
