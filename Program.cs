@@ -17,7 +17,6 @@ namespace Drawing_Complex
         private static readonly List<Vector2> vecs = [];
         private static readonly List<float> freqs = [];
         private static readonly List<Vector2> pts = [];
-        static Vector2 center = new(w / 2, h / 2);
         static void Reset()
         {
             pts.Clear();
@@ -32,6 +31,7 @@ namespace Drawing_Complex
         }
         static void UpdateVecs(Mode m)
         {
+            Vector2 center = new(w / 2, h / 2);
             Vector2 accumulate = new();
             if (m == Mode.WithBrushLines)
             {
@@ -52,7 +52,7 @@ namespace Drawing_Complex
         }
         static void UpdateState()
         {
-            if (Raylib.IsKeyPressed(KeyboardKey.R))
+            if (Raylib.IsKeyPressed(KeyboardKey.R) || Raylib.IsWindowResized())
             {
                 Reset();
             }
