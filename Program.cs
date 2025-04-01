@@ -11,9 +11,10 @@ namespace Drawing_Complex
         static int w = 1000;
         static int h = 750;
         static float angle = 0.0f;
-        static float mag = 110.0f;
-        static float phase = MathF.PI / 4.0f;
-        static int N = 3;
+        static bool stop = false;
+        private static readonly DrawingMode m = DrawingMode.WithBrushLines;
+        private static readonly int N = 3;
+        private static readonly float mag = 150;
 
         private static readonly List<Vector2> vecs = [];
         private static readonly List<float> freqs = [];
@@ -36,17 +37,30 @@ namespace Drawing_Complex
             Vector2 accumulate = new();
             if (m == DrawingMode.WithBrushLines)
             {
-                vecs.Add(center);
-                for (int i = 1; i < N; i++)
+                if (vecs.Count > 0)
                 {
-                    vecs.Add(vecs[i - 1] + new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase)));
+                    for (int i = 1; i < N; i++)
+                    {
+                        Vector2 temp = vecs[i];
+                        temp.X = vecs[i - 1].X + -mag * MathF.Cos(freqs[i - 1] * angle);
+                        temp.Y = vecs[i - 1].Y + mag * MathF.Sin(freqs[i - 1] * angle);
+                        vecs[i] = temp;
+                    }
+                }
+                else
+                {
+                    vecs.Add(center);
+                    for (int i = 1; i < N; i++)
+                    {
+                        vecs.Add(vecs[i - 1] + new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle), mag * MathF.Sin(freqs[i - 1] * angle)));
+                    }
                 }
                 accumulate = vecs[^1];
             }
             else if (m == DrawingMode.WithOutBrushLines)
             {
                 for (int i = 1; i < N; i++)
-                    accumulate += new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle + (i + 1) * phase), mag * MathF.Sin(freqs[i - 1] * angle + (i + 1) * phase));
+                    accumulate += new Vector2(-mag * MathF.Cos(freqs[i - 1] * angle), mag * MathF.Sin(freqs[i - 1] * angle));
                 accumulate += center;
             }
             pts.Add(accumulate);
@@ -59,7 +73,14 @@ namespace Drawing_Complex
             }
             w = Raylib.GetScreenWidth();
             h = Raylib.GetScreenHeight();
-            angle += 0.05f;
+            if (Raylib.IsKeyPressed(KeyboardKey.Space))
+            {
+                stop = !stop;
+                if (stop)
+                    UpdateVecs(m);
+            }
+            if (!stop)
+                angle += 0.05f;
         }
         static void Render(DrawingMode m)
         {
@@ -90,29 +111,29 @@ namespace Drawing_Complex
         static void Main(string[] args)
         {
             int i = 0;
-            Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
-            int FPS = 0;
-            Raylib.SetTargetFPS(FPS);
-
+            int FPS = 60;
             bool generate = false;
             int sec = 10;
-            int duration = sec * 60;
+            int duration = sec * FPS;
+
+            Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
+            Raylib.SetTargetFPS(FPS);
             Raylib.InitWindow(w, h, "Complex");
-            DrawingMode m = DrawingMode.WithBrushLines;
+
             Reset();
+            
             while(!Raylib.WindowShouldClose())
             {
                 UpdateState();
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(new(0x18, 0x18, 0x18));
 
-                UpdateVecs(m);
+                if (!stop)
+                    UpdateVecs(m);
                 Render(m);
 
-                    vecs.Clear();
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
-                // TODO: specify a duration to produce produce image for and then pipe to ffmpeg
                 if (generate && i < duration)
                     TakeScreenShotAndSave(i++);
             }
