@@ -111,10 +111,10 @@ namespace Drawing_Complex
         static void Main(string[] args)
         {
             int i = 0;
-            int FPS = 60;
+            int FPS = 300;
             bool generate = false;
             int sec = 10;
-            int duration = sec * FPS;
+            int frames = sec * FPS;
 
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
             Raylib.SetTargetFPS(FPS);
@@ -134,7 +134,7 @@ namespace Drawing_Complex
 
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
-                if (generate && i < duration)
+                if (generate && i < frames)
                     TakeScreenShotAndSave(i++);
             }
             Raylib.CloseWindow();
