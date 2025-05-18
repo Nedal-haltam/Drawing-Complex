@@ -91,37 +91,14 @@ namespace Drawing_Complex
             for (int i = 0; i < pts.Count - 1; i++)
                 Raylib.DrawLineV(pts[i], pts[i + 1], Color.White);
         }
-        static void TakeScreenShotAndSave(int i)
-        {
-            // ffmpeg -framerate 60 -i image%d.png -c:v libx264 -pix_fmt yuv420p output.mp4
-            string dirpath = $"./pics/";
-            string filepath = $"image{i}.png";
-            string destination = dirpath + $"{filepath}";
-
-            if (!Directory.Exists(dirpath))
-                Directory.CreateDirectory(dirpath);
-
-
-            Image image = Raylib.LoadImageFromScreen();
-            Raylib.ExportImage(image, filepath);
-            Raylib.UnloadImage(image);
-            while (!File.Exists(filepath)) ;
-            File.Move(filepath, destination);
-        }
         static void Main(string[] args)
         {
-            int i = 0;
             int FPS = 300;
-            bool generate = false;
-            int sec = 10;
-            int frames = sec * FPS;
-
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
             Raylib.SetTargetFPS(FPS);
             Raylib.InitWindow(w, h, "Complex");
 
             Reset();
-            
             while(!Raylib.WindowShouldClose())
             {
                 UpdateState();
@@ -134,8 +111,6 @@ namespace Drawing_Complex
 
                 Raylib.DrawFPS(0, 0);
                 Raylib.EndDrawing();
-                if (generate && i < frames)
-                    TakeScreenShotAndSave(i++);
             }
             Raylib.CloseWindow();
         }
