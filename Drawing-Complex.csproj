@@ -11,18 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Raylib-cs">
-      <HintPath>Raylib-cs.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Raylib-cs.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="raylib.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Raylib-cs" Version="7.0.1" />
   </ItemGroup>
 
 </Project>

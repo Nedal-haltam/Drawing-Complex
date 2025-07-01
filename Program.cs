@@ -1,7 +1,8 @@
 ﻿
-using Raylib_cs;
+using System;
+using System.Collections.Generic;
 using System.Numerics;
-using System.Reflection.Metadata;
+using Raylib_cs;
 
 namespace Drawing_Complex
 {
@@ -93,7 +94,7 @@ namespace Drawing_Complex
         }
         static void Main(string[] args)
         {
-            int FPS = 300;
+            int FPS = 0;
             Raylib.SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.ResizableWindow);
             Raylib.SetTargetFPS(FPS);
             Raylib.InitWindow(w, h, "Complex");
